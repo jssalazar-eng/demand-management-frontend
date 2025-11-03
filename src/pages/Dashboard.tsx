@@ -1,54 +1,139 @@
 import {
-  Assignment,
-  CheckCircle,
-  People,
-  TrendingUp,
+  Assignment as AssignmentIcon,
+  CheckCircle as CheckCircleIcon,
+  PlayArrow as PlayArrowIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardActions,
   CardContent,
   Chip,
+  CircularProgress,
+  Divider,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ConnectionError } from "../components/common";
+import { useDashboard } from "../hooks/useDashboard";
+import { useReferenceData } from "../hooks/useReferenceData";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { dashboardData, loading, error, refetch } = useDashboard(5);
+  const { statuses, getStatusName, getUserName } = useReferenceData();
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    // Verificar si es un error de conexión
+    if (error.includes("conexión") || error.includes("internet") || error.includes("red")) {
+      return (
+        <ConnectionError
+          onRetry={refetch}
+          title="Sin conexión a internet"
+          message="No se pueden cargar los datos del dashboard. Verifica tu conexión e intenta nuevamente."
+        />
+      );
+    }
+    
+    // Para otros tipos de errores
+    return (
+      <Box>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={refetch}>
+              Reintentar
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <Box>
+        <Alert severity="warning">
+          No se pudieron cargar los datos del dashboard
+        </Alert>
+      </Box>
+    );
+  }
+
   const stats = [
     {
       title: "Total Demandas",
-      value: "156",
-      icon: Assignment,
+      value: dashboardData.stats.totalDemands,
+      icon: AssignmentIcon,
       color: "primary" as const,
-      change: "+12%",
     },
     {
       title: "En Progreso",
-      value: "42",
-      icon: TrendingUp,
+      value: dashboardData.stats.inProgressDemands,
+      icon: PlayArrowIcon,
       color: "warning" as const,
-      change: "+5%",
     },
     {
       title: "Completadas",
-      value: "89",
-      icon: CheckCircle,
+      value: dashboardData.stats.completedDemands,
+      icon: CheckCircleIcon,
       color: "success" as const,
-      change: "+8%",
     },
     {
-      title: "Usuarios Activos",
-      value: "23",
-      icon: People,
-      color: "info" as const,
-      change: "+2%",
+      title: "Críticas",
+      value: dashboardData.stats.criticalDemands,
+      icon: WarningIcon,
+      color: "error" as const,
     },
   ];
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusColor = (statusId: string) => {
+    const status = statuses.find((s: any) => s.id === statusId);
+    const statusName = status?.name?.toLowerCase();
+
+    if (statusName?.includes("completad") || statusName?.includes("cerrad"))
+      return "success";
+    if (statusName?.includes("progreso") || statusName?.includes("proceso"))
+      return "warning";
+    if (statusName?.includes("critic") || statusName?.includes("urgent"))
+      return "error";
+    return "default";
+  };
 
   return (
     <Box>
@@ -77,12 +162,6 @@ const Dashboard: React.FC = () => {
                     <Typography variant="h4" component="div">
                       {stat.value}
                     </Typography>
-                    <Chip
-                      label={stat.change}
-                      color={stat.color}
-                      size="small"
-                      sx={{ mt: 1 }}
-                    />
                   </Box>
                   <Icon
                     sx={{
@@ -104,9 +183,42 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Demandas Recientes
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Lista de las últimas demandas creadas en el sistema
             </Typography>
+            {dashboardData.recentDemands.length > 0 ? (
+              <List>
+                {dashboardData.recentDemands.map((demand, index) => (
+                  <React.Fragment key={demand.id}>
+                    <ListItem
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => navigate(`/demands/${demand.id}`)}
+                    >
+                      <ListItemText
+                        primary={demand.title}
+                        secondary={`Solicitante: ${getUserName(
+                          demand.requestingUserId
+                        )} - ${formatDate(demand.createdDate)}`}
+                      />
+                      <ListItemSecondaryAction>
+                        <Chip
+                          label={getStatusName(demand.statusId)}
+                          size="small"
+                          color={getStatusColor(demand.statusId)}
+                        />
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {index < dashboardData.recentDemands.length - 1 && (
+                      <Divider />
+                    )}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No hay demandas recientes
+              </Typography>
+            )}
           </CardContent>
           <CardActions>
             <Button

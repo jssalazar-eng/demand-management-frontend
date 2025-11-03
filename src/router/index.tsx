@@ -2,12 +2,12 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "../components/layout";
 import {
-  Categories,
   Dashboard,
   DemandCreate,
   DemandDetail,
   DemandEdit,
   DemandList,
+  Notifications,
   Reports,
   Settings,
   Users,
@@ -48,8 +48,8 @@ const router = createBrowserRouter([
         element: <Reports />,
       },
       {
-        path: "categories",
-        element: <Categories />,
+        path: "notifications",
+        element: <Notifications />,
       },
       {
         path: "settings",

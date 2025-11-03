@@ -116,9 +116,24 @@ class NotificationService {
     return this.info(`📊 ${entity} cargados correctamente`);
   }
 
-  static connectionError() {
+  static connectionError(details?: string) {
+    const baseMessage = "🔌 Sin conexión a internet";
+    const fullMessage = details 
+      ? `${baseMessage}: ${details}` 
+      : `${baseMessage}. Verifica tu conexión e intenta nuevamente.`;
+    
+    return this.error(fullMessage, {
+      autoClose: false, // No cerrar automáticamente
+      closeOnClick: true,
+    });
+  }
+
+  static serverError() {
     return this.error(
-      "🔌 Error de conexión con el servidor. Verifique su conexión a internet."
+      "🚨 El servidor no está disponible. Intenta más tarde.",
+      {
+        autoClose: 8000,
+      }
     );
   }
 

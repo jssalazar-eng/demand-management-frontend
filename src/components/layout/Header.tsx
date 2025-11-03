@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         </IconButton>
 
         <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-          <Logo size="medium" showText={true} />
+          <Logo size="extra-large" showText={true} />
         </Box>
 
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>

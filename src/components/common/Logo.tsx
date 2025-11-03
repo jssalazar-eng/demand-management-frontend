@@ -6,7 +6,7 @@ import React from "react";
 import logoImage from "../../assets/images/logo.webp";
 
 interface LogoProps {
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "extra-large";
   showText?: boolean;
 }
 
@@ -17,6 +17,7 @@ export const Logo: React.FC<LogoProps> = ({ size = "medium" }) => {
     small: { width: 40, height: 40, fontSize: "0.875rem" },
     medium: { width: 52, height: 52, fontSize: "1rem" },
     large: { width: 64, height: 64, fontSize: "1.25rem" },
+    "extra-large": { width: 80, height: 80, fontSize: "1.5rem" },
   };
 
   const currentSize = sizeMap[size];

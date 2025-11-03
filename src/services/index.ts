@@ -1,4 +1,5 @@
 export * from "./apiService";
+export * from "./DashboardService";
 export {
   DemandService,
   DemandTypeService,

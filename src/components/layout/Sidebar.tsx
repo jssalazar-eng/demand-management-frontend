@@ -1,8 +1,8 @@
 import {
   Analytics,
   Assignment,
-  Category,
   Dashboard,
+  Notifications,
   People,
   Settings,
 } from "@mui/icons-material";
@@ -54,15 +54,15 @@ const menuItems: MenuItem[] = [
     path: "/reports",
     icon: Analytics,
   },
-  {
-    id: "categories",
-    label: "Categorías",
-    path: "/categories",
-    icon: Category,
-  },
 ];
 
 const settingsItems: MenuItem[] = [
+  {
+    id: "notifications",
+    label: "Notificaciones",
+    path: "/notifications",
+    icon: Notifications,
+  },
   {
     id: "settings",
     label: "Configuración",

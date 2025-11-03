@@ -38,11 +38,27 @@ class ApiService {
         return response;
       },
       (error) => {
-        if (error.response?.status === 401) {
+        // Handle different types of errors
+        if (!error.response) {
+          // Network error (no internet, server down, etc.)
+          console.error("Network Error:", error.message);
+          error.isNetworkError = true;
+          error.userMessage = "Sin conexión a internet. Verifica tu conexión.";
+        } else if (error.response.status === 401) {
           // Handle unauthorized access
           localStorage.removeItem("token");
           window.location.href = "/login";
+        } else if (error.response.status >= 500) {
+          // Server errors
+          error.userMessage = "Error del servidor. Intenta más tarde.";
+        } else if (error.response.status === 404) {
+          // Not found errors
+          error.userMessage = "Recurso no encontrado.";
+        } else if (error.response.status >= 400) {
+          // Client errors
+          error.userMessage = error.response.data?.message || "Error en la solicitud.";
         }
+        
         return Promise.reject(error);
       }
     );
