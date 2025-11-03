@@ -1,0 +1,21 @@
+export interface MenuItem {
+  id: string;
+  label: string;
+  path: string;
+  icon?: React.ComponentType;
+  children?: MenuItem[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface AppConfig {
+  apiBaseUrl: string;
+  apiVersion: string;
+  appName: string;
+  appVersion: string;
+}
