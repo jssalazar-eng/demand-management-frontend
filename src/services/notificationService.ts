@@ -118,10 +118,10 @@ class NotificationService {
 
   static connectionError(details?: string) {
     const baseMessage = "🔌 Sin conexión a internet";
-    const fullMessage = details 
-      ? `${baseMessage}: ${details}` 
+    const fullMessage = details
+      ? `${baseMessage}: ${details}`
       : `${baseMessage}. Verifica tu conexión e intenta nuevamente.`;
-    
+
     return this.error(fullMessage, {
       autoClose: false, // No cerrar automáticamente
       closeOnClick: true,
@@ -129,12 +129,9 @@ class NotificationService {
   }
 
   static serverError() {
-    return this.error(
-      "🚨 El servidor no está disponible. Intenta más tarde.",
-      {
-        autoClose: 8000,
-      }
-    );
+    return this.error("🚨 El servidor no está disponible. Intenta más tarde.", {
+      autoClose: 8000,
+    });
   }
 
   static validationError(message: string) {

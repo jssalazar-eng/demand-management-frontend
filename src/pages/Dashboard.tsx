@@ -47,7 +47,11 @@ const Dashboard: React.FC = () => {
 
   if (error) {
     // Verificar si es un error de conexión
-    if (error.includes("conexión") || error.includes("internet") || error.includes("red")) {
+    if (
+      error.includes("conexión") ||
+      error.includes("internet") ||
+      error.includes("red")
+    ) {
       return (
         <ConnectionError
           onRetry={refetch}
@@ -56,7 +60,7 @@ const Dashboard: React.FC = () => {
         />
       );
     }
-    
+
     // Para otros tipos de errores
     return (
       <Box>

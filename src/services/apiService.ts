@@ -56,9 +56,10 @@ class ApiService {
           error.userMessage = "Recurso no encontrado.";
         } else if (error.response.status >= 400) {
           // Client errors
-          error.userMessage = error.response.data?.message || "Error en la solicitud.";
+          error.userMessage =
+            error.response.data?.message || "Error en la solicitud.";
         }
-        
+
         return Promise.reject(error);
       }
     );

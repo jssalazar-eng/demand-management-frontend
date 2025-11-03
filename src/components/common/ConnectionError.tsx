@@ -1,17 +1,17 @@
-import React from "react";
 import {
+  Refresh as RefreshIcon,
+  WifiOff as WifiOffIcon,
+} from "@mui/icons-material";
+import {
+  Alert,
   Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  Button,
-  Alert,
   Stack,
+  Typography,
 } from "@mui/material";
-import {
-  WifiOff as WifiOffIcon,
-  Refresh as RefreshIcon,
-} from "@mui/icons-material";
+import React from "react";
 
 interface ConnectionErrorProps {
   onRetry?: () => void;
@@ -52,7 +52,7 @@ const ConnectionError: React.FC<ConnectionErrorProps> = ({
                 opacity: 0.7,
               }}
             />
-            
+
             <Stack spacing={1}>
               <Typography variant="h5" component="h2" color="error">
                 {title}
@@ -64,9 +64,10 @@ const ConnectionError: React.FC<ConnectionErrorProps> = ({
 
             <Alert severity="info" sx={{ width: "100%" }}>
               <Typography variant="body2">
-                • Verifica que estés conectado a internet<br />
-                • Comprueba que el servidor esté disponible<br />
-                • Intenta recargar la página
+                • Verifica que estés conectado a internet
+                <br />
+                • Comprueba que el servidor esté disponible
+                <br />• Intenta recargar la página
               </Typography>
             </Alert>
 
