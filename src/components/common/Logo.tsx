@@ -14,10 +14,10 @@ export const Logo: React.FC<LogoProps> = ({ size = "medium" }) => {
   const theme = useTheme();
 
   const sizeMap = {
-    small: { width: 40, height: 40, fontSize: "0.875rem" },
-    medium: { width: 52, height: 52, fontSize: "1rem" },
-    large: { width: 64, height: 64, fontSize: "1.25rem" },
-    "extra-large": { width: 80, height: 80, fontSize: "1.5rem" },
+    small: { width: 40, height: 30, fontSize: "0.875rem" },
+    medium: { width: 52, height: 39, fontSize: "1rem" },
+    large: { width: 64, height: 48, fontSize: "1.25rem" },
+    "extra-large": { width: 80, height: 60, fontSize: "1.5rem" },
   };
 
   const currentSize = sizeMap[size];

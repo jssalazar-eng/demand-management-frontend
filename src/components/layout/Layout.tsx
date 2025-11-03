@@ -1,6 +1,7 @@
 import { Box, CssBaseline, Toolbar } from "@mui/material";
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { ConnectionStatus } from "../common";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
@@ -34,6 +35,7 @@ const Layout: React.FC = () => {
         }}
       >
         <Toolbar />
+        <ConnectionStatus compact showDetails={false} />
         <Outlet />
       </Box>
     </Box>
