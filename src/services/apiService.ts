@@ -51,7 +51,6 @@ class ApiService {
   public get<T>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this.api.get<T>(url, { params });
   }
-
   public post<T>(url: string, data?: any): Promise<AxiosResponse<T>> {
     return this.api.post<T>(url, data);
   }

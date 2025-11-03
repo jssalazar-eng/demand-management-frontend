@@ -6,6 +6,7 @@ interface UseDemandReturn {
   demand: Demand | null;
   loading: boolean;
   error: string | null;
+  isDemoMode: boolean;
   fetchDemand: (id: string) => Promise<void>;
 }
 
@@ -13,35 +14,21 @@ export const useDemand = (id?: string): UseDemandReturn => {
   const [demand, setDemand] = useState<Demand | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   const fetchDemand = async (demandId: string): Promise<void> => {
     setLoading(true);
     setError(null);
+    setIsDemoMode(false);
 
     try {
       const response = await DemandService.getDemandById(demandId);
-      setDemand(response);
-    } catch (err) {
-      console.warn("API not available, using mock data for demand:", demandId);
-      // Datos de prueba cuando la API no está disponible
-      const mockDemand: Demand = {
-        id: demandId,
-        title: `Demanda ${demandId}`,
-        description:
-          "Esta es una demanda de ejemplo para mostrar la funcionalidad cuando la API no está disponible.",
-        status: "PENDING" as any,
-        priority: "HIGH" as any,
-        requester: "Usuario Demo",
-        assignee: "Desarrollador 1",
-        createdAt: new Date("2024-01-15"),
-        updatedAt: new Date("2024-01-16"),
-        category: "Desarrollo",
-        estimatedHours: 8,
-        dueDate: new Date("2024-02-01"),
-      };
 
-      setDemand(mockDemand);
-      setError("API no disponible - Mostrando datos de ejemplo");
+      setDemand(response);
+      setError(null);
+    } catch (err: any) {
+      setError(`Error al cargar demanda: ${err.message}`);
+      setDemand(null);
     } finally {
       setLoading(false);
     }
@@ -57,6 +44,7 @@ export const useDemand = (id?: string): UseDemandReturn => {
     demand,
     loading,
     error,
+    isDemoMode,
     fetchDemand,
   };
 };

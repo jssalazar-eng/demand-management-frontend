@@ -76,7 +76,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   const location = useLocation();
 
   const handleNavigation = (path: string) => {
-    console.log("Navigating to:", path);
     navigate(path);
     onClose();
   };

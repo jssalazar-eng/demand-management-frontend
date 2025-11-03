@@ -9,6 +9,11 @@ import {
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   InputAdornment,
   Pagination,
@@ -25,27 +30,42 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Types
+import type { Demand } from "../../types";
+
+// Components
 import { ErrorMessage, LoadingSpinner } from "../../components/common";
-import { useDemands } from "../../hooks";
+
+// Services
+import { DemandService, NotificationService } from "../../services";
+
+// Hooks
+import { useDemands, useReferenceData } from "../../hooks";
+
+// Utils
 import {
   formatDate,
   getPriorityColor,
   getPriorityLabel,
   getStatusColor,
-  getStatusLabel,
 } from "../../utils";
 
 const DemandList: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [demandToDelete, setDemandToDelete] = useState<Demand | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { demands, loading, error, totalPages, currentPage, fetchDemands } =
     useDemands();
+  const { getStatusName, getUserName } = useReferenceData();
 
   const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     value: number
   ) => {
-    fetchDemands(value);
+    fetchDemands({ pageNumber: value });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,15 +82,58 @@ const DemandList: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    // Implementar lógica de eliminación con confirmación
-    console.log("Delete demand:", id);
+    const demand = demands.find((d) => d.id === id);
+    if (demand) {
+      setDemandToDelete(demand);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!demandToDelete) return;
+
+    setDeleting(true);
+    const toastId = NotificationService.loading(
+      `Eliminando demanda "${demandToDelete.title}"...`
+    );
+
+    try {
+      await DemandService.deleteDemand(demandToDelete.id);
+
+      NotificationService.update(toastId, {
+        render: `✅ Demanda "${demandToDelete.title}" eliminada exitosamente`,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+
+      fetchDemands({ pageNumber: currentPage });
+    } catch (error: any) {
+      NotificationService.update(toastId, {
+        render: `❌ Error al eliminar la demanda: ${
+          error.message || "Error desconocido"
+        }`,
+        type: "error",
+        isLoading: false,
+        autoClose: 6000,
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setDemandToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setDemandToDelete(null);
   };
 
   const filteredDemands = demands.filter(
-    (demand) =>
+    (demand: Demand) =>
       demand.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       demand.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      demand.requester.toLowerCase().includes(searchTerm.toLowerCase())
+      demand.requestingUserId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -136,7 +199,7 @@ const DemandList: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredDemands.map((demand) => (
+            {filteredDemands.map((demand: Demand) => (
               <TableRow key={demand.id} hover>
                 <TableCell>
                   <Typography variant="subtitle2">{demand.title}</Typography>
@@ -144,11 +207,11 @@ const DemandList: React.FC = () => {
                     {demand.description}
                   </Typography>
                 </TableCell>
-                <TableCell>{demand.requester}</TableCell>
+                <TableCell>{getUserName(demand.requestingUserId)}</TableCell>
                 <TableCell>
                   <Chip
-                    label={getStatusLabel(demand.status)}
-                    color={getStatusColor(demand.status)}
+                    label={getStatusName(demand.statusId)}
+                    color={getStatusColor(demand.statusId)}
                     size="small"
                   />
                 </TableCell>
@@ -159,8 +222,12 @@ const DemandList: React.FC = () => {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{formatDate(demand.createdAt)}</TableCell>
-                <TableCell>{demand.assignee || "Sin asignar"}</TableCell>
+                <TableCell>{formatDate(demand.createdDate)}</TableCell>
+                <TableCell>
+                  {demand.assignedToId
+                    ? getUserName(demand.assignedToId)
+                    : "Sin asignar"}
+                </TableCell>
                 <TableCell align="center">
                   <IconButton
                     size="small"
@@ -210,6 +277,38 @@ const DemandList: React.FC = () => {
           />
         </Box>
       )}
+
+      {/* Diálogo de confirmación de eliminación */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            ¿Estás seguro de que deseas eliminar la demanda "
+            {demandToDelete?.title}"? Esta acción no se puede deshacer.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} disabled={deleting}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={<DeleteIcon />}
+          >
+            {deleting ? "Eliminando..." : "Eliminar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

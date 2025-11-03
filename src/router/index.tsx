@@ -4,7 +4,9 @@ import { Layout } from "../components/layout";
 import {
   Categories,
   Dashboard,
+  DemandCreate,
   DemandDetail,
+  DemandEdit,
   DemandList,
   Reports,
   Settings,
@@ -24,6 +26,14 @@ const router = createBrowserRouter([
       {
         path: "demands",
         element: <DemandList />,
+      },
+      {
+        path: "demands/new",
+        element: <DemandCreate />,
+      },
+      {
+        path: "demands/:id/edit",
+        element: <DemandEdit />,
       },
       {
         path: "demands/:id",

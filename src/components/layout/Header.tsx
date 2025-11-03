@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { config } from "../../utils";
+import { Logo } from "../common";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -38,6 +39,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         >
           <MenuIcon />
         </IconButton>
+
+        <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+          <Logo size="medium" showText={true} />
+        </Box>
 
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           {config.appName}

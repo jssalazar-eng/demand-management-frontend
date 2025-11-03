@@ -1,65 +1,111 @@
+// Entidades principales
 export interface Demand {
   id: string;
   title: string;
   description: string;
-  status: DemandStatus;
   priority: DemandPriority;
-  requester: string;
-  assignee?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  dueDate?: Date;
-  category: string;
-  estimatedHours?: number;
-  actualHours?: number;
+  demandTypeId: string;
+  statusId: string;
+  requestingUserId: string;
+  assignedToId?: string;
+  dueDate?: string; // ISO string
+  closeDate?: string; // ISO string
+  createdDate: string; // ISO string
+  updatedDate: string; // ISO string
 }
 
-export enum DemandStatus {
-  PENDING = "PENDING",
-  IN_PROGRESS = "IN_PROGRESS",
-  COMPLETED = "COMPLETED",
-  CANCELLED = "CANCELLED",
-  ON_HOLD = "ON_HOLD",
+export interface DemandType {
+  id: string;
+  name: string;
+  description?: string;
 }
 
+export interface Status {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface User {
+  id: string;
+  fullName: string;
+  corporateEmail: string;
+  roleId: string;
+  department: string;
+}
+
+// Enums para prioridad - valores que espera el backend
 export enum DemandPriority {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-  URGENT = "URGENT",
+  LOW = 0,
+  MEDIUM = 1,
+  HIGH = 2,
+  CRITICAL = 3,
 }
 
+// DTOs para requests
 export interface CreateDemandRequest {
+  cmd: string;
   title: string;
   description: string;
-  priority: DemandPriority;
-  requester: string;
-  category: string;
-  dueDate?: Date;
-  estimatedHours?: number;
+  priority: number; // 0=Low, 1=Medium, 2=High, 3=Critical
+  demandTypeId: string;
+  statusId: string;
+  requestingUserId: string;
+  assignedToId?: string | null;
+  dueDate?: string | null; // ISO string
 }
 
 export interface UpdateDemandRequest {
+  id: string;
   title?: string;
   description?: string;
-  status?: DemandStatus;
   priority?: DemandPriority;
-  assignee?: string;
-  dueDate?: Date;
-  estimatedHours?: number;
-  actualHours?: number;
+  demandTypeId?: string;
+  statusId?: string;
+  assignedToId?: string;
+  dueDate?: string; // ISO string
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message: string;
-  success: boolean;
+// Filtros para búsqueda
+export interface DemandFilters {
+  demandTypeId?: string;
+  statusId?: string;
+  priority?: DemandPriority;
+  searchTerm?: string;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
+// Respuestas paginadas
 export interface PaginatedResponse<T> {
-  data: T[];
+  items: T[];
   totalCount: number;
   pageNumber: number;
   pageSize: number;
   totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+// Respuesta estándar de la API
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  success: boolean;
+  errors?: string[];
+}
+
+// Tipos extendidos para la UI
+export interface DemandWithDetails extends Demand {
+  demandType?: DemandType;
+  status?: Status;
+  requestingUser?: User;
+  assignedUser?: User;
 }

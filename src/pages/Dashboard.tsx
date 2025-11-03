@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => navigate("/demands")}
+                onClick={() => navigate("/demands/new")}
               >
                 Nueva Demanda
               </Button>

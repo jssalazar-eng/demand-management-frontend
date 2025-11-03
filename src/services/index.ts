@@ -1,2 +1,9 @@
 export * from "./apiService";
-export * from "./demandService";
+export {
+  DemandService,
+  DemandTypeService,
+  RoleService,
+  StatusService,
+  UserService,
+} from "./demandService";
+export { default as NotificationService } from "./notificationService";

@@ -1,90 +1,73 @@
 import { useEffect, useState } from "react";
 import { DemandService } from "../services";
-import { Demand, PaginatedResponse } from "../types";
+import { Demand, DemandFilters } from "../types";
 
-interface UseDemandReturn {
+interface UseDemandsReturn {
   demands: Demand[];
   loading: boolean;
   error: string | null;
   totalCount: number;
   currentPage: number;
   totalPages: number;
-  fetchDemands: (page?: number, pageSize?: number) => Promise<void>;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  fetchDemands: (filters?: DemandFilters) => Promise<void>;
   refreshDemands: () => Promise<void>;
 }
 
 export const useDemands = (
-  initialPage: number = 1,
-  initialPageSize: number = 10
-): UseDemandReturn => {
+  initialFilters: DemandFilters = {}
+): UseDemandsReturn => {
   const [demands, setDemands] = useState<Demand[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(initialPage);
+  const [currentPage, setCurrentPage] = useState<number>(
+    initialFilters.pageNumber || 1
+  );
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [pageSize] = useState<number>(initialPageSize);
+  const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
+  const [currentFilters, setCurrentFilters] =
+    useState<DemandFilters>(initialFilters);
 
   const fetchDemands = async (
-    page: number = currentPage,
-    size: number = pageSize
+    filters: DemandFilters = currentFilters
   ): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response: PaginatedResponse<Demand> =
-        await DemandService.getDemands(page, size);
-      setDemands(response.data);
+      const response = await DemandService.getDemandsFiltered(filters);
+
+      setDemands(response.items);
       setTotalCount(response.totalCount);
       setCurrentPage(response.pageNumber);
       setTotalPages(response.totalPages);
-    } catch (err) {
-      console.warn("API not available, using mock data:", err);
-      // Datos de prueba cuando la API no está disponible
-      const mockDemands: Demand[] = [
-        {
-          id: "1",
-          title: "Demanda de Ejemplo 1",
-          description:
-            "Esta es una demanda de ejemplo para mostrar la funcionalidad",
-          status: "PENDING" as any,
-          priority: "HIGH" as any,
-          requester: "Usuario Demo",
-          createdAt: new Date("2024-01-15"),
-          updatedAt: new Date("2024-01-15"),
-          category: "Desarrollo",
-        },
-        {
-          id: "2",
-          title: "Demanda de Ejemplo 2",
-          description: "Segunda demanda de ejemplo",
-          status: "IN_PROGRESS" as any,
-          priority: "MEDIUM" as any,
-          requester: "Otro Usuario",
-          assignee: "Desarrollador 1",
-          createdAt: new Date("2024-01-10"),
-          updatedAt: new Date("2024-01-16"),
-          category: "Soporte",
-        },
-      ];
+      setHasPreviousPage(response.hasPreviousPage);
+      setHasNextPage(response.hasNextPage);
+      setCurrentFilters(filters);
+      setError(null);
+    } catch (err: any) {
+      setError(`Error al cargar demandas: ${err.message}`);
 
-      setDemands(mockDemands);
-      setTotalCount(mockDemands.length);
-      setCurrentPage(page);
-      setTotalPages(1);
-      setError("API no disponible - Mostrando datos de ejemplo");
+      setDemands([]);
+      setTotalCount(0);
+      setCurrentPage(1);
+      setTotalPages(0);
+      setHasPreviousPage(false);
+      setHasNextPage(false);
     } finally {
       setLoading(false);
     }
   };
 
   const refreshDemands = async (): Promise<void> => {
-    await fetchDemands(currentPage, pageSize);
+    await fetchDemands(currentFilters);
   };
 
   useEffect(() => {
-    fetchDemands(initialPage, initialPageSize);
+    fetchDemands(initialFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -95,6 +78,8 @@ export const useDemands = (
     totalCount,
     currentPage,
     totalPages,
+    hasPreviousPage,
+    hasNextPage,
     fetchDemands,
     refreshDemands,
   };

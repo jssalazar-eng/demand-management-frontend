@@ -3,23 +3,23 @@ import { createTheme } from "@mui/material/styles";
 export const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2",
-      light: "#42a5f5",
-      dark: "#1565c0",
+      main: "#abbc2e",
+      light: "#c5d255",
+      dark: "#7a8620",
     },
     secondary: {
-      main: "#dc004e",
-      light: "#e33371",
-      dark: "#9a0036",
+      main: "#000",
+      light: "#333",
+      dark: "#000",
     },
     background: {
-      default: "#f5f5f5",
-      paper: "#ffffff",
+      default: "#f1f1f1",
+      paper: "#fff",
     },
     success: {
-      main: "#2e7d32",
-      light: "#4caf50",
-      dark: "#1b5e20",
+      main: "#abbc2e",
+      light: "#c5d255",
+      dark: "#7a8620",
     },
     warning: {
       main: "#ed6c02",
@@ -32,36 +32,56 @@ export const theme = createTheme({
       dark: "#c62828",
     },
     info: {
-      main: "#0288d1",
-      light: "#03a9f4",
-      dark: "#01579b",
+      main: "#abbc2e",
+      light: "#c5d255",
+      dark: "#7a8620",
+    },
+    text: {
+      primary: "#000",
+      secondary: "#666",
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily:
+      'Asap, Poppins, Montserrat, "San Francisco", icomoon, -apple-system, BlinkMacSystemFont, "avenir next", avenir, "helvetica neue", helvetica, ubuntu, roboto, noto, "segoe ui", arial, sans-serif',
+    fontSize: 13,
     h1: {
       fontSize: "2.5rem",
       fontWeight: 500,
+      color: "#000",
     },
     h2: {
       fontSize: "2rem",
       fontWeight: 500,
+      color: "#000",
     },
     h3: {
       fontSize: "1.75rem",
       fontWeight: 500,
+      color: "#000",
     },
     h4: {
       fontSize: "1.5rem",
       fontWeight: 500,
+      color: "#000",
     },
     h5: {
       fontSize: "1.25rem",
       fontWeight: 500,
+      color: "#000",
     },
     h6: {
       fontSize: "1rem",
       fontWeight: 500,
+      color: "#000",
+    },
+    body1: {
+      fontSize: "13px",
+      color: "#000",
+    },
+    body2: {
+      fontSize: "12px",
+      color: "#666",
     },
   },
   shape: {
@@ -87,7 +107,8 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#1976d2",
+          backgroundColor: "#abbc2e",
+          color: "#000",
         },
       },
     },

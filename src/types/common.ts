@@ -6,13 +6,6 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
 export interface AppConfig {
   apiBaseUrl: string;
   apiVersion: string;

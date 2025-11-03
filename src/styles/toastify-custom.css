@@ -1,0 +1,157 @@
+/* Estilos personalizados para React-Toastify con colores HACEB */
+
+/* Contenedor principal */
+.Toastify__toast-container {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    z-index: 9999;
+}
+
+/* Estilos base para todos los toasts */
+.Toastify__toast {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 64px;
+    padding: 16px;
+    margin-bottom: 8px;
+}
+
+/* Toast de éxito - Verde HACEB */
+.toast-success-haceb {
+    background: linear-gradient(135deg, #abbc2e 0%, #98a826 100%) !important;
+    color: white !important;
+    border-left: 4px solid #8ba122;
+}
+
+.toast-success-haceb .Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Toast de error - Rojo */
+.toast-error-haceb {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+    color: white !important;
+    border-left: 4px solid #c62828;
+}
+
+.toast-error-haceb .Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Toast de advertencia - Naranja */
+.toast-warning-haceb {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+    color: white !important;
+    border-left: 4px solid #ef6c00;
+}
+
+.toast-warning-haceb .Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Toast de información - Azul */
+.toast-info-haceb {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+    color: white !important;
+    border-left: 4px solid #1565c0;
+}
+
+.toast-info-haceb .Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Toast de carga - Gris HACEB */
+.toast-loading-haceb {
+    background: linear-gradient(135deg, #607d8b 0%, #455a64 100%) !important;
+    color: white !important;
+    border-left: 4px solid #37474f;
+}
+
+/* Iconos */
+.Toastify__toast-icon {
+    margin-right: 12px;
+    width: 24px;
+    height: 24px;
+}
+
+/* Botón de cerrar */
+.Toastify__close-button {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 18px;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.Toastify__close-button:hover {
+    opacity: 1;
+}
+
+/* Barra de progreso */
+.Toastify__progress-bar {
+    height: 4px;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Animaciones mejoradas */
+.Toastify__slide-enter--top-right {
+    animation-name: Toastify__slideInRight;
+    animation-duration: 0.4s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.Toastify__slide-exit--top-right {
+    animation-name: Toastify__slideOutRight;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Responsive */
+@media only screen and (max-width: 480px) {
+    .Toastify__toast-container {
+        width: 100vw;
+        padding: 0;
+        left: 0;
+        margin: 0;
+    }
+
+    .Toastify__toast-container--top-right {
+        top: 0;
+        right: 0;
+    }
+
+    .Toastify__toast {
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+/* Tema oscuro opcional */
+@media (prefers-color-scheme: dark) {
+    .Toastify__toast {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Hover effects */
+.Toastify__toast:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+/* Estilos para diferentes posiciones */
+.Toastify__toast-container--top-center {
+    top: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.Toastify__toast-container--bottom-center {
+    bottom: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+}

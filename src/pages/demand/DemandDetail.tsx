@@ -9,35 +9,86 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Stack,
   Typography,
 } from "@mui/material";
-import React from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ErrorMessage, LoadingSpinner } from "../../components/common";
-import { useDemand } from "../../hooks";
+import {
+  DemoModeAlert,
+  ErrorMessage,
+  LoadingSpinner,
+} from "../../components/common";
+import { useDemand, useReferenceData } from "../../hooks";
+import { DemandService, NotificationService } from "../../services";
 import {
   formatDateTime,
   getPriorityColor,
   getPriorityLabel,
   getStatusColor,
-  getStatusLabel,
 } from "../../utils";
 
 const DemandDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { demand, loading, error } = useDemand(id);
+
+  const { demand, loading, error, isDemoMode } = useDemand(id);
+  const { getDemandTypeName, getStatusName, getUserName } = useReferenceData();
+  const [showDemoAlert, setShowDemoAlert] = useState<boolean>(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleEdit = () => {
     navigate(`/demands/${id}/edit`);
   };
 
   const handleDelete = () => {
-    // Implementar lógica de eliminación con confirmación
-    console.log("Delete demand:", id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!demand || !id) return;
+
+    setDeleting(true);
+    const toastId = NotificationService.loading(
+      `Eliminando demanda "${demand.title}"...`
+    );
+
+    try {
+      await DemandService.deleteDemand(id);
+
+      NotificationService.update(toastId, {
+        render: `✅ Demanda "${demand.title}" eliminada exitosamente`,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+
+      navigate("/demands");
+    } catch (error: any) {
+      NotificationService.update(toastId, {
+        render: `❌ Error al eliminar la demanda: ${
+          error.message || "Error desconocido"
+        }`,
+        type: "error",
+        isLoading: false,
+        autoClose: 6000,
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
   };
 
   const handleBack = () => {
@@ -58,6 +109,14 @@ const DemandDetail: React.FC = () => {
 
   return (
     <Box>
+      {/* Alerta de modo demo */}
+      {isDemoMode && showDemoAlert && (
+        <DemoModeAlert
+          show={showDemoAlert}
+          onClose={() => setShowDemoAlert(false)}
+        />
+      )}
+
       <Box display="flex" alignItems="center" mb={3}>
         <IconButton onClick={handleBack} sx={{ mr: 2 }}>
           <ArrowBackIcon />
@@ -102,8 +161,8 @@ const DemandDetail: React.FC = () => {
                     Estado
                   </Typography>
                   <Chip
-                    label={getStatusLabel(demand.status)}
-                    color={getStatusColor(demand.status)}
+                    label={getStatusName(demand.statusId)}
+                    color={getStatusColor(demand.statusId)}
                     sx={{ mt: 0.5 }}
                   />
                 </Box>
@@ -119,10 +178,10 @@ const DemandDetail: React.FC = () => {
                 </Box>
                 <Box flex={1}>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Categoría
+                    Tipo de Demanda
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {demand.category}
+                    {getDemandTypeName(demand.demandTypeId)}
                   </Typography>
                 </Box>
               </Stack>
@@ -151,7 +210,7 @@ const DemandDetail: React.FC = () => {
                     Solicitante
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {demand.requester}
+                    {getUserName(demand.requestingUserId)}
                   </Typography>
                 </Box>
                 <Box flex={1}>
@@ -159,7 +218,9 @@ const DemandDetail: React.FC = () => {
                     Asignado a
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {demand.assignee || "Sin asignar"}
+                    {demand.assignedToId
+                      ? getUserName(demand.assignedToId)
+                      : "Sin asignar"}
                   </Typography>
                 </Box>
               </Stack>
@@ -177,7 +238,7 @@ const DemandDetail: React.FC = () => {
                     Fecha de Creación
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {formatDateTime(demand.createdAt)}
+                    {formatDateTime(demand.createdDate)}
                   </Typography>
                 </Box>
                 <Box flex={1}>
@@ -185,7 +246,7 @@ const DemandDetail: React.FC = () => {
                     Última Actualización
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {formatDateTime(demand.updatedAt)}
+                    {formatDateTime(demand.updatedDate)}
                   </Typography>
                 </Box>
                 {demand.dueDate && (
@@ -201,6 +262,7 @@ const DemandDetail: React.FC = () => {
               </Stack>
             </Box>
 
+            {/* Información de tiempo - Disponible en versiones futuras
             {(demand.estimatedHours || demand.actualHours) && (
               <>
                 <Divider />
@@ -233,9 +295,42 @@ const DemandDetail: React.FC = () => {
                 </Box>
               </>
             )}
+            */}
           </Stack>
         </CardContent>
       </Card>
+
+      {/* Diálogo de confirmación de eliminación */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            ¿Estás seguro de que deseas eliminar la demanda "{demand?.title}"?
+            Esta acción no se puede deshacer.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} disabled={deleting}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={<DeleteIcon />}
+          >
+            {deleting ? "Eliminando..." : "Eliminar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
