@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -17,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useReferenceData } from "../../hooks/useReferenceData";
 import { DemandService, NotificationService } from "../../services";
 import { CreateDemandRequest, DemandPriority } from "../../types";
+import { getPriorityOptions } from "../../utils";
 
 interface FormData {
   title: string;
@@ -25,7 +27,6 @@ interface FormData {
   statusId: string | "";
   priority: number | "";
   assignedToId: string | "";
-  dueDate: string;
 }
 
 interface FormErrors {
@@ -35,6 +36,22 @@ interface FormErrors {
   statusId?: string;
   priority?: string;
 }
+
+// Función para encontrar el estado inicial por defecto
+const getDefaultStatusId = (statuses: any[]): string => {
+  // Buscar un estado que sea inicial o que contenga "registrado" en el nombre
+  const defaultStatus = statuses.find(
+    (status) =>
+      status.isInitial ||
+      status.name.toLowerCase().includes("registrado") ||
+      status.name.toLowerCase().includes("inicial") ||
+      status.name.toLowerCase().includes("nueva")
+  );
+  return defaultStatus?.id || (statuses.length > 0 ? statuses[0].id : "");
+};
+
+// ID del usuario actual que crea las demandas (Ana María Martínez)
+const CURRENT_USER_ID = "5af5c3b6-58ca-45ff-a9d7-20fe4e6ff337";
 
 const DemandCreate: React.FC = () => {
   const navigate = useNavigate();
@@ -49,11 +66,21 @@ const DemandCreate: React.FC = () => {
     title: "",
     description: "",
     demandTypeId: "",
-    statusId: "",
+    statusId: "", // Se establecerá cuando se carguen los estados
     priority: DemandPriority.MEDIUM, // Valor por defecto válido
-    assignedToId: "",
-    dueDate: "",
+    assignedToId: "", // Vacío por defecto como solicitado
   });
+
+  // Actualizar statusId cuando se cargan los estados
+  React.useEffect(() => {
+    if (statuses.length > 0 && !formData.statusId) {
+      const defaultStatusId = getDefaultStatusId(statuses);
+      setFormData((prev) => ({
+        ...prev,
+        statusId: defaultStatusId,
+      }));
+    }
+  }, [statuses, formData.statusId]); // Agregadas las dependencias necesarias
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -73,11 +100,14 @@ const DemandCreate: React.FC = () => {
       newErrors.demandTypeId = "El tipo de demanda es requerido";
     }
 
-    if (!formData.statusId) {
-      newErrors.statusId = "El estado es requerido";
-    }
+    // Status is automatically set, no validation needed
+    // Assignment is optional and can be empty (and disabled in this form)
 
-    if (!formData.priority) {
+    if (
+      formData.priority === "" ||
+      formData.priority === null ||
+      formData.priority === undefined
+    ) {
       newErrors.priority = "La prioridad es requerida";
     }
 
@@ -123,17 +153,15 @@ const DemandCreate: React.FC = () => {
 
     try {
       const requestData: CreateDemandRequest = {
-        cmd: "CreateDemand", // Campo requerido por el backend
         title: formData.title.trim(),
         description: formData.description.trim(),
         demandTypeId: formData.demandTypeId as string,
         statusId: formData.statusId as string,
         priority: formData.priority as number, // 0=Low, 1=Medium, 2=High, 3=Critical
-        requestingUserId: "5af5c3b6-58ca-45ff-a9d7-20fe4e6ff337", // Ana Martínez del backend
+        requestingUserId: CURRENT_USER_ID, // Ana Martínez del backend
         assignedToId: formData.assignedToId
           ? (formData.assignedToId as string)
           : null,
-        dueDate: formData.dueDate || null,
       };
 
       await DemandService.createDemand(requestData);
@@ -247,7 +275,6 @@ const DemandCreate: React.FC = () => {
 
                 <FormControl
                   sx={{ minWidth: 200, flex: 1 }}
-                  required
                   error={!!errors.statusId}
                 >
                   <InputLabel>Estado</InputLabel>
@@ -255,6 +282,7 @@ const DemandCreate: React.FC = () => {
                     value={formData.statusId}
                     onChange={handleInputChange("statusId")}
                     label="Estado"
+                    disabled
                   >
                     {statuses.map((status) => (
                       <MenuItem key={status.id} value={status.id}>
@@ -262,6 +290,9 @@ const DemandCreate: React.FC = () => {
                       </MenuItem>
                     ))}
                   </Select>
+                  <FormHelperText>
+                    Se establece automáticamente como "Registrado"
+                  </FormHelperText>
                 </FormControl>
               </Box>
 
@@ -277,10 +308,11 @@ const DemandCreate: React.FC = () => {
                     onChange={handleInputChange("priority")}
                     label="Prioridad"
                   >
-                    <MenuItem value={DemandPriority.LOW}>Baja</MenuItem>
-                    <MenuItem value={DemandPriority.MEDIUM}>Media</MenuItem>
-                    <MenuItem value={DemandPriority.HIGH}>Alta</MenuItem>
-                    <MenuItem value={DemandPriority.CRITICAL}>Crítica</MenuItem>
+                    {getPriorityOptions().map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 
@@ -290,6 +322,7 @@ const DemandCreate: React.FC = () => {
                     value={formData.assignedToId}
                     onChange={handleInputChange("assignedToId")}
                     label="Asignar a"
+                    disabled
                   >
                     <MenuItem value="">Sin asignar</MenuItem>
                     {users.map((user) => (
@@ -298,20 +331,11 @@ const DemandCreate: React.FC = () => {
                       </MenuItem>
                     ))}
                   </Select>
+                  <FormHelperText>
+                    Se mantendrá sin asignar hasta posterior asignación
+                  </FormHelperText>
                 </FormControl>
               </Box>
-
-              <TextField
-                fullWidth
-                label="Fecha límite"
-                type="date"
-                value={formData.dueDate}
-                onChange={handleInputChange("dueDate")}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                sx={{ maxWidth: 300 }}
-              />
 
               <Box
                 sx={{

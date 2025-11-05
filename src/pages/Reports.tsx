@@ -28,6 +28,7 @@ import { useReferenceData } from "../hooks/useReferenceData";
 import { DemandService } from "../services/demandService";
 import NotificationService from "../services/notificationService";
 import { Demand, DemandPriority } from "../types";
+import { getPriorityLabel } from "../utils";
 
 interface ReportFilters {
   searchTerm?: string;
@@ -162,11 +163,29 @@ const Reports: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const getPriorityChip = (priority: DemandPriority) => {
-    const option = PRIORITY_OPTIONS.find((opt) => opt.value === priority);
+  const getPriorityChip = (priority: string | DemandPriority) => {
+    // Convertir string a número para buscar en PRIORITY_OPTIONS
+    let priorityValue: DemandPriority;
+
+    if (typeof priority === "string") {
+      const priorityLower = priority.toLowerCase();
+      if (priorityLower === "low" || priorityLower === "baja")
+        priorityValue = DemandPriority.LOW;
+      else if (priorityLower === "medium" || priorityLower === "media")
+        priorityValue = DemandPriority.MEDIUM;
+      else if (priorityLower === "high" || priorityLower === "alta")
+        priorityValue = DemandPriority.HIGH;
+      else if (priorityLower === "critical" || priorityLower === "crítica")
+        priorityValue = DemandPriority.CRITICAL;
+      else priorityValue = DemandPriority.LOW;
+    } else {
+      priorityValue = priority;
+    }
+
+    const option = PRIORITY_OPTIONS.find((opt) => opt.value === priorityValue);
     return (
       <Chip
-        label={option?.label || "Desconocida"}
+        label={getPriorityLabel(priority)}
         size="small"
         sx={{
           backgroundColor: option?.color || "#gray",

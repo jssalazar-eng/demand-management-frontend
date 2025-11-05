@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -18,6 +19,7 @@ import { useDemand } from "../../hooks/useDemand";
 import { useReferenceData } from "../../hooks/useReferenceData";
 import { DemandService, NotificationService } from "../../services";
 import { DemandPriority, UpdateDemandRequest } from "../../types";
+import { getPriorityOptions } from "../../utils";
 
 interface FormData {
   title: string;
@@ -26,7 +28,6 @@ interface FormData {
   statusId: string | "";
   priority: number | "";
   assignedToId: string;
-  dueDate: string;
 }
 
 interface FormErrors {
@@ -35,7 +36,11 @@ interface FormErrors {
   demandTypeId?: string;
   statusId?: string;
   priority?: string;
+  assignedToId?: string;
 }
+
+// ID del usuario actual que crea las demandas (Ana María Martínez)
+const CURRENT_USER_ID = "5af5c3b6-58ca-45ff-a9d7-20fe4e6ff337";
 
 const DemandEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,13 +60,22 @@ const DemandEdit: React.FC = () => {
     statusId: "",
     priority: DemandPriority.MEDIUM,
     assignedToId: "",
-    dueDate: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
   // Cargar datos de la demanda en el formulario
+  // Helper para convertir prioridad string a número
+  const convertPriorityToNumber = (priority: string): number => {
+    const priorityLower = priority.toLowerCase();
+    if (priorityLower === "low" || priorityLower === "baja") return 0;
+    if (priorityLower === "medium" || priorityLower === "media") return 1;
+    if (priorityLower === "high" || priorityLower === "alta") return 2;
+    if (priorityLower === "critical" || priorityLower === "crítica") return 3;
+    return 0; // Default to low
+  };
+
   useEffect(() => {
     if (demand) {
       setFormData({
@@ -69,9 +83,8 @@ const DemandEdit: React.FC = () => {
         description: demand.description,
         demandTypeId: demand.demandTypeId,
         statusId: demand.statusId,
-        priority: demand.priority,
+        priority: convertPriorityToNumber(demand.priority),
         assignedToId: demand.assignedToId || "",
-        dueDate: demand.dueDate ? demand.dueDate.split("T")[0] : "", // Formato YYYY-MM-DD
       });
     }
   }, [demand]);
@@ -95,7 +108,16 @@ const DemandEdit: React.FC = () => {
       newErrors.statusId = "El estado es requerido";
     }
 
-    if (!formData.priority) {
+    // Validar que no se asigne a la misma persona que crea la demanda
+    if (formData.assignedToId && formData.assignedToId === CURRENT_USER_ID) {
+      newErrors.assignedToId = "No puedes asignarte una demanda a ti mismo";
+    }
+
+    if (
+      formData.priority === "" ||
+      formData.priority === null ||
+      formData.priority === undefined
+    ) {
       newErrors.priority = "La prioridad es requerida";
     }
 
@@ -149,10 +171,9 @@ const DemandEdit: React.FC = () => {
         title: formData.title.trim(),
         description: formData.description.trim(),
         demandTypeId: formData.demandTypeId as string,
-        statusId: formData.statusId as string,
-        priority: formData.priority as DemandPriority,
-        ...(formData.assignedToId && { assignedToId: formData.assignedToId }),
-        ...(formData.dueDate && { dueDate: formData.dueDate }),
+        statusId: formData.statusId as string, // Incluir statusId en la actualización
+        priority: formData.priority as number, // Cambiar a number según la documentación
+        assignedToId: formData.assignedToId || null, // Incluir assignedToId en la actualización
       };
 
       await DemandService.updateDemand(id, requestData);
@@ -242,6 +263,9 @@ const DemandEdit: React.FC = () => {
                 helperText={errors.title}
                 required
                 placeholder="Ingrese el título de la demanda"
+                InputProps={{
+                  readOnly: true,
+                }}
               />
 
               <TextField
@@ -255,6 +279,9 @@ const DemandEdit: React.FC = () => {
                 rows={4}
                 required
                 placeholder="Describa detalladamente la demanda"
+                InputProps={{
+                  readOnly: true,
+                }}
               />
 
               <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
@@ -268,6 +295,7 @@ const DemandEdit: React.FC = () => {
                     value={formData.demandTypeId}
                     onChange={handleInputChange("demandTypeId")}
                     label="Tipo de Demanda"
+                    readOnly
                   >
                     {demandTypes.map((type) => (
                       <MenuItem key={type.id} value={type.id}>
@@ -308,15 +336,20 @@ const DemandEdit: React.FC = () => {
                     value={formData.priority}
                     onChange={handleInputChange("priority")}
                     label="Prioridad"
+                    readOnly
                   >
-                    <MenuItem value={DemandPriority.LOW}>Baja</MenuItem>
-                    <MenuItem value={DemandPriority.MEDIUM}>Media</MenuItem>
-                    <MenuItem value={DemandPriority.HIGH}>Alta</MenuItem>
-                    <MenuItem value={DemandPriority.CRITICAL}>Crítica</MenuItem>
+                    {getPriorityOptions().map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 
-                <FormControl sx={{ minWidth: 200, flex: 1 }}>
+                <FormControl
+                  sx={{ minWidth: 200, flex: 1 }}
+                  error={!!errors.assignedToId}
+                >
                   <InputLabel>Asignar a</InputLabel>
                   <Select
                     value={formData.assignedToId}
@@ -330,20 +363,11 @@ const DemandEdit: React.FC = () => {
                       </MenuItem>
                     ))}
                   </Select>
+                  {errors.assignedToId && (
+                    <FormHelperText>{errors.assignedToId}</FormHelperText>
+                  )}
                 </FormControl>
               </Box>
-
-              <TextField
-                fullWidth
-                label="Fecha límite"
-                type="date"
-                value={formData.dueDate}
-                onChange={handleInputChange("dueDate")}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                sx={{ maxWidth: 300 }}
-              />
 
               <Box
                 sx={{

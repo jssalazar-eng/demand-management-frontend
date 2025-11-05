@@ -1,10 +1,14 @@
 import { toast, ToastOptions, ToastPosition } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  NOTIFICATION_DURATIONS,
+  NOTIFICATION_POSITIONS,
+} from "../constants/notifications";
 
 // Configuración base para todas las notificaciones
 const defaultConfig: ToastOptions = {
-  position: "top-right" as ToastPosition,
-  autoClose: 4000,
+  position: NOTIFICATION_POSITIONS.TOP_RIGHT as ToastPosition,
+  autoClose: NOTIFICATION_DURATIONS.DEFAULT,
   hideProgressBar: false,
   closeOnClick: true,
   pauseOnHover: true,
@@ -16,22 +20,22 @@ const defaultConfig: ToastOptions = {
 const configs = {
   success: {
     ...defaultConfig,
-    autoClose: 3000,
+    autoClose: NOTIFICATION_DURATIONS.SUCCESS,
     className: "toast-success-haceb",
   },
   error: {
     ...defaultConfig,
-    autoClose: 6000,
+    autoClose: NOTIFICATION_DURATIONS.ERROR,
     className: "toast-error-haceb",
   },
   warning: {
     ...defaultConfig,
-    autoClose: 5000,
+    autoClose: NOTIFICATION_DURATIONS.WARNING,
     className: "toast-warning-haceb",
   },
   info: {
     ...defaultConfig,
-    autoClose: 4000,
+    autoClose: NOTIFICATION_DURATIONS.INFO,
     className: "toast-info-haceb",
   },
   loading: {

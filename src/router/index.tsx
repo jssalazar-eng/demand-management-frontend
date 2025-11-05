@@ -1,6 +1,7 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "../components/layout";
+import { ROUTES } from "../constants/navigation";
 import {
   Dashboard,
   DemandCreate,
@@ -16,7 +17,7 @@ import NotFound from "../pages/NotFound";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: ROUTES.HOME,
     element: <Layout />,
     children: [
       {
@@ -56,7 +57,7 @@ const router = createBrowserRouter([
         element: <Settings />,
       },
       {
-        path: "*",
+        path: ROUTES.NOT_FOUND,
         element: <NotFound />,
       },
     ],

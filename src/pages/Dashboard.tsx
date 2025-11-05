@@ -25,12 +25,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ConnectionError } from "../components/common";
 import { useDashboard } from "../hooks/useDashboard";
-import { useReferenceData } from "../hooks/useReferenceData";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { dashboardData, loading, error, refetch } = useDashboard(5);
-  const { statuses, getStatusName, getUserName } = useReferenceData();
+  // Remover import de useReferenceData ya que no se usa
+  // const { statuses } = useReferenceData();
 
   if (loading) {
     return (
@@ -126,16 +126,14 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const getStatusColor = (statusId: string) => {
-    const status = statuses.find((s: any) => s.id === statusId);
-    const statusName = status?.name?.toLowerCase();
+  const getStatusColor = (statusName: string) => {
+    const name = statusName?.toLowerCase();
 
-    if (statusName?.includes("completad") || statusName?.includes("cerrad"))
+    if (name?.includes("completad") || name?.includes("cerrad"))
       return "success";
-    if (statusName?.includes("progreso") || statusName?.includes("proceso"))
+    if (name?.includes("progreso") || name?.includes("proceso"))
       return "warning";
-    if (statusName?.includes("critic") || statusName?.includes("urgent"))
-      return "error";
+    if (name?.includes("critic") || name?.includes("urgent")) return "error";
     return "default";
   };
 
@@ -200,15 +198,15 @@ const Dashboard: React.FC = () => {
                     >
                       <ListItemText
                         primary={demand.title}
-                        secondary={`Solicitante: ${getUserName(
-                          demand.requestingUserId
-                        )} - ${formatDate(demand.createdDate)}`}
+                        secondary={`Solicitante: ${
+                          demand.requestingUserName
+                        } - ${formatDate(demand.createdDate)}`}
                       />
                       <ListItemSecondaryAction>
                         <Chip
-                          label={getStatusName(demand.statusId)}
+                          label={demand.statusName}
                           size="small"
-                          color={getStatusColor(demand.statusId)}
+                          color={getStatusColor(demand.statusName)}
                         />
                       </ListItemSecondaryAction>
                     </ListItem>

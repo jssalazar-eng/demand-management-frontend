@@ -1,4 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import {
+  API_CONFIG,
+  CONTENT_TYPES,
+  HTTP_HEADERS,
+  HTTP_STATUS,
+  HTTP_STATUS_RANGES,
+} from "../constants/api";
 import { config } from "../utils/config";
 
 class ApiService {
@@ -7,9 +14,9 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: config.apiBaseUrl,
-      timeout: 10000,
+      timeout: API_CONFIG.DEFAULT_TIMEOUT,
       headers: {
-        "Content-Type": "application/json",
+        [HTTP_HEADERS.CONTENT_TYPE]: CONTENT_TYPES.JSON,
       },
     });
 
@@ -23,7 +30,7 @@ class ApiService {
         // Add auth token if available
         const token = localStorage.getItem("token");
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${token}`;
         }
         return config;
       },
@@ -44,17 +51,21 @@ class ApiService {
           console.error("Network Error:", error.message);
           error.isNetworkError = true;
           error.userMessage = "Sin conexión a internet. Verifica tu conexión.";
-        } else if (error.response.status === 401) {
+        } else if (error.response.status === HTTP_STATUS.UNAUTHORIZED) {
           // Handle unauthorized access
           localStorage.removeItem("token");
           window.location.href = "/login";
-        } else if (error.response.status >= 500) {
+        } else if (
+          error.response.status >= HTTP_STATUS_RANGES.SERVER_ERROR_START
+        ) {
           // Server errors
           error.userMessage = "Error del servidor. Intenta más tarde.";
-        } else if (error.response.status === 404) {
+        } else if (error.response.status === HTTP_STATUS.NOT_FOUND) {
           // Not found errors
           error.userMessage = "Recurso no encontrado.";
-        } else if (error.response.status >= 400) {
+        } else if (
+          error.response.status >= HTTP_STATUS_RANGES.CLIENT_ERROR_START
+        ) {
           // Client errors
           error.userMessage =
             error.response.data?.message || "Error en la solicitud.";

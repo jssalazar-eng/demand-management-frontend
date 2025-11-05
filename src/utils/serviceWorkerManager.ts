@@ -1,4 +1,10 @@
 import React from "react";
+import {
+  BROWSER_CAPABILITIES,
+  SERVICE_WORKER_EVENTS,
+  SERVICE_WORKER_MESSAGES,
+  SERVICE_WORKER_STATES,
+} from "../constants/serviceWorker";
 
 // Utility para registrar y manejar Service Worker
 
@@ -7,7 +13,7 @@ class ServiceWorkerManager {
   private isSupported: boolean = false;
 
   constructor() {
-    this.isSupported = "serviceWorker" in navigator;
+    this.isSupported = BROWSER_CAPABILITIES.SERVICE_WORKER in navigator;
   }
 
   // Registrar el Service Worker
@@ -26,25 +32,34 @@ class ServiceWorkerManager {
       );
 
       // Escuchar actualizaciones
-      this.registration.addEventListener("updatefound", () => {
-        const newWorker = this.registration?.installing;
-        if (newWorker) {
-          newWorker.addEventListener("statechange", () => {
-            if (
-              newWorker.state === "installed" &&
-              navigator.serviceWorker.controller
-            ) {
-              // Nueva versión disponible
-              this.notifyUpdate();
-            }
-          });
+      this.registration.addEventListener(
+        SERVICE_WORKER_EVENTS.UPDATE_FOUND,
+        () => {
+          const newWorker = this.registration?.installing;
+          if (newWorker) {
+            newWorker.addEventListener(
+              SERVICE_WORKER_EVENTS.STATE_CHANGE,
+              () => {
+                if (
+                  newWorker.state === SERVICE_WORKER_STATES.INSTALLED &&
+                  navigator.serviceWorker.controller
+                ) {
+                  // Nueva versión disponible
+                  this.notifyUpdate();
+                }
+              }
+            );
+          }
         }
-      });
+      );
 
       // Escuchar mensajes del Service Worker
-      navigator.serviceWorker.addEventListener("message", (event) => {
-        this.handleServiceWorkerMessage(event.data);
-      });
+      navigator.serviceWorker.addEventListener(
+        SERVICE_WORKER_EVENTS.MESSAGE,
+        (event) => {
+          this.handleServiceWorkerMessage(event.data);
+        }
+      );
 
       return true;
     } catch (error) {
@@ -56,7 +71,7 @@ class ServiceWorkerManager {
   // Manejar mensajes del Service Worker
   private handleServiceWorkerMessage(data: any): void {
     switch (data.type) {
-      case "CACHE_USED":
+      case SERVICE_WORKER_MESSAGES.CACHE_USED:
         console.info(`Usando datos en caché para: ${data.url}`);
         // Aquí podrías mostrar una notificación al usuario
         break;
@@ -79,7 +94,9 @@ class ServiceWorkerManager {
   // Saltar espera y activar nueva versión
   async skipWaiting(): Promise<void> {
     if (this.registration?.waiting) {
-      this.registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      this.registration.waiting.postMessage({
+        type: SERVICE_WORKER_MESSAGES.SKIP_WAITING,
+      });
       window.location.reload();
     }
   }
@@ -97,9 +114,10 @@ class ServiceWorkerManager {
         resolve(event.data.success);
       };
 
-      this.registration?.active?.postMessage({ type: "CLEAR_CACHE" }, [
-        messageChannel.port2,
-      ]);
+      this.registration?.active?.postMessage(
+        { type: SERVICE_WORKER_MESSAGES.CLEAR_CACHE },
+        [messageChannel.port2]
+      );
     });
   }
 
@@ -116,9 +134,10 @@ class ServiceWorkerManager {
         resolve(event.data);
       };
 
-      this.registration?.active?.postMessage({ type: "GET_CACHE_STATUS" }, [
-        messageChannel.port2,
-      ]);
+      this.registration?.active?.postMessage(
+        { type: SERVICE_WORKER_MESSAGES.GET_CACHE_STATUS },
+        [messageChannel.port2]
+      );
     });
   }
 

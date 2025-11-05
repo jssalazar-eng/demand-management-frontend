@@ -69,7 +69,7 @@ export const getStatusColor = (
 };
 
 export const getPriorityColor = (
-  priority: DemandPriority
+  priority: string | DemandPriority
 ):
   | "default"
   | "primary"
@@ -78,38 +78,91 @@ export const getPriorityColor = (
   | "info"
   | "success"
   | "warning" => {
-  switch (priority) {
-    case DemandPriority.LOW:
-      return "success";
-    case DemandPriority.MEDIUM:
-      return "info";
-    case DemandPriority.HIGH:
-      return "warning";
-    case DemandPriority.CRITICAL:
-      return "error";
-    default:
-      return "default";
+  // Manejo tanto de strings como enums
+  const priorityStr =
+    typeof priority === "string" ? priority.toLowerCase() : "";
+
+  if (
+    priority === DemandPriority.LOW ||
+    priorityStr === "low" ||
+    priorityStr === "baja"
+  ) {
+    return "success";
   }
+  if (
+    priority === DemandPriority.MEDIUM ||
+    priorityStr === "medium" ||
+    priorityStr === "media"
+  ) {
+    return "info";
+  }
+  if (
+    priority === DemandPriority.HIGH ||
+    priorityStr === "high" ||
+    priorityStr === "alta"
+  ) {
+    return "warning";
+  }
+  if (
+    priority === DemandPriority.CRITICAL ||
+    priorityStr === "critical" ||
+    priorityStr === "crítica"
+  ) {
+    return "error";
+  }
+  return "default";
 };
 
 export const getPriorityLabel = (priority: any): string => {
+  // Si es un string, intentar traducirlo del inglés al español
+  if (typeof priority === "string") {
+    const priorityLower = priority.toLowerCase().trim();
+
+    // Mapeo de strings en inglés a español
+    switch (priorityLower) {
+      case "low":
+      case "baja":
+        return "Baja";
+      case "medium":
+      case "media":
+        return "Media";
+      case "high":
+      case "alta":
+        return "Alta";
+      case "critical":
+      case "crítica":
+        return "Crítica";
+      default:
+        return priority; // Devolver el original si no reconocemos el valor
+    }
+  }
+
+  // Si es un número o enum
   if (typeof priority === "number") {
     return formatPriorityNumber(priority);
   }
-  if (typeof priority === "string") {
-    return priority;
-  }
+
+  // Si es un objeto con propiedad name
   if (typeof priority === "object" && priority?.name) {
-    return priority.name;
+    return getPriorityLabel(priority.name); // Recursión para procesar el name
   }
-  // Compatibilidad con valores del backend (0, 1, 2, 3)
+
+  // Compatibilidad con valores del backend y enum
   if (priority === 0 || priority === DemandPriority.LOW) return "Baja";
   if (priority === 1 || priority === DemandPriority.MEDIUM) return "Media";
   if (priority === 2 || priority === DemandPriority.HIGH) return "Alta";
   if (priority === 3 || priority === DemandPriority.CRITICAL) return "Crítica";
 
-  return "Prioridad Desconocida";
+  return String(priority || "N/A");
 };
+
+// Helper function para obtener todas las opciones de prioridad
+export const getPriorityOptions = () => [
+  { value: DemandPriority.LOW, label: "Baja" },
+  { value: DemandPriority.MEDIUM, label: "Media" },
+  { value: DemandPriority.HIGH, label: "Alta" },
+  { value: DemandPriority.CRITICAL, label: "Crítica" },
+];
 
 // Helper para convertir fecha ISO string a Date
 export const parseISODate = (isoString?: string): Date | undefined => {
@@ -126,14 +179,14 @@ export const toISOString = (date?: Date): string | undefined => {
 // Helper para formatear prioridad numérica
 export const formatPriorityNumber = (priority: number): string => {
   switch (priority) {
-    case 1:
+    case 0:
       return "Baja";
-    case 2:
+    case 1:
       return "Media";
-    case 3:
+    case 2:
       return "Alta";
-    case 4:
-      return "Urgente";
+    case 3:
+      return "Crítica";
     default:
       return `Prioridad ${priority}`;
   }

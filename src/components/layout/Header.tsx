@@ -61,11 +61,24 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Perfil">
-            <IconButton color="inherit">
-              <AccountCircle />
-            </IconButton>
-          </Tooltip>
+          {/* Información del usuario logueado */}
+          <Box sx={{ display: "flex", alignItems: "center", ml: 2, mr: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "inherit",
+                mr: 1,
+                display: { xs: "none", sm: "block" },
+              }}
+            >
+              Ana María Martínez
+            </Typography>
+            <Tooltip title="Perfil">
+              <IconButton color="inherit">
+                <AccountCircle />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Toolbar>
     </AppBar>

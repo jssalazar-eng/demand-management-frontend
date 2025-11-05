@@ -1,12 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { DOM_ELEMENTS } from "./constants/navigation";
+import { BROWSER_CAPABILITIES } from "./constants/serviceWorker";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { serviceWorkerManager } from "./utils/serviceWorkerManager";
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById(DOM_ELEMENTS.ROOT) as HTMLElement
 );
 root.render(
   <React.StrictMode>
@@ -15,7 +17,7 @@ root.render(
 );
 
 // Registrar Service Worker para funcionalidad offline
-if ("serviceWorker" in navigator) {
+if (BROWSER_CAPABILITIES.SERVICE_WORKER in navigator) {
   serviceWorkerManager
     .register()
     .then(() => {

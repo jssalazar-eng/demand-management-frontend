@@ -63,17 +63,15 @@ export class DemandService {
   }
   static async createDemand(demand: CreateDemandRequest): Promise<Demand> {
     try {
-      // Estructura exacta que espera el backend
+      // Estructura exacta que espera el backend según documentación
       const payload = {
-        cmd: demand.cmd, // Campo requerido por el backend
         title: demand.title,
-        description: demand.description,
+        description: demand.description || "",
         priority: demand.priority, // 0=Low, 1=Medium, 2=High, 3=Critical
         demandTypeId: demand.demandTypeId,
         statusId: demand.statusId,
         requestingUserId: demand.requestingUserId,
         assignedToId: demand.assignedToId || null,
-        dueDate: demand.dueDate || null,
       };
 
       const response = await apiService.post<Demand>(

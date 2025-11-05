@@ -20,9 +20,13 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import {
+  NAVIGATION_IDS,
+  NAVIGATION_LABELS,
+  ROUTES,
+} from "../../constants/navigation";
+import { COLOR_STATES, COMMON_STYLES, UI_CONSTANTS } from "../../constants/ui";
 import { MenuItem } from "../../types";
-
-const DRAWER_WIDTH = 240;
 
 interface SidebarProps {
   open: boolean;
@@ -31,42 +35,42 @@ interface SidebarProps {
 
 const menuItems: MenuItem[] = [
   {
-    id: "dashboard",
-    label: "Dashboard",
-    path: "/",
+    id: NAVIGATION_IDS.DASHBOARD,
+    label: NAVIGATION_LABELS.DASHBOARD,
+    path: ROUTES.DASHBOARD,
     icon: Dashboard,
   },
   {
-    id: "demands",
-    label: "Demandas",
-    path: "/demands",
+    id: NAVIGATION_IDS.DEMANDS,
+    label: NAVIGATION_LABELS.DEMANDS,
+    path: ROUTES.DEMANDS,
     icon: Assignment,
   },
   {
-    id: "users",
-    label: "Usuarios",
-    path: "/users",
+    id: NAVIGATION_IDS.USERS,
+    label: NAVIGATION_LABELS.USERS,
+    path: ROUTES.USERS,
     icon: People,
   },
   {
-    id: "reports",
-    label: "Reportes",
-    path: "/reports",
+    id: NAVIGATION_IDS.REPORTS,
+    label: NAVIGATION_LABELS.REPORTS,
+    path: ROUTES.REPORTS,
     icon: Analytics,
   },
 ];
 
 const settingsItems: MenuItem[] = [
   {
-    id: "notifications",
-    label: "Notificaciones",
-    path: "/notifications",
+    id: NAVIGATION_IDS.NOTIFICATIONS,
+    label: NAVIGATION_LABELS.NOTIFICATIONS,
+    path: ROUTES.NOTIFICATIONS,
     icon: Notifications,
   },
   {
-    id: "settings",
-    label: "Configuración",
-    path: "/settings",
+    id: NAVIGATION_IDS.SETTINGS,
+    label: NAVIGATION_LABELS.SETTINGS,
+    path: ROUTES.SETTINGS,
     icon: Settings,
   },
 ];
@@ -102,7 +106,11 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
             >
               {Icon && (
                 <ListItemIcon
-                  sx={{ color: isActive ? "primary.main" : "inherit" }}
+                  sx={{
+                    color: isActive
+                      ? COLOR_STATES.PRIMARY
+                      : COLOR_STATES.INHERIT,
+                  }}
                 >
                   <Icon />
                 </ListItemIcon>
@@ -111,8 +119,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
                 primary={item.label}
                 sx={{
                   "& .MuiListItemText-primary": {
-                    color: isActive ? "primary.main" : "inherit",
-                    fontWeight: isActive ? "bold" : "normal",
+                    color: isActive
+                      ? COLOR_STATES.PRIMARY
+                      : COLOR_STATES.INHERIT,
+                    fontWeight: isActive
+                      ? COMMON_STYLES.FONT_WEIGHT.BOLD
+                      : COMMON_STYLES.FONT_WEIGHT.NORMAL,
                   },
                 }}
               />
@@ -148,10 +160,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           keepMounted: true, // Better open performance on mobile.
         }}
         sx={{
-          display: { xs: "block", md: "none" },
+          display: {
+            xs: COMMON_STYLES.DISPLAY.BLOCK,
+            md: COMMON_STYLES.DISPLAY.NONE,
+          },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: DRAWER_WIDTH,
+            width: UI_CONSTANTS.DRAWER_WIDTH,
           },
         }}
       >
@@ -162,10 +177,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: "none", md: "block" },
+          display: {
+            xs: COMMON_STYLES.DISPLAY.NONE,
+            md: COMMON_STYLES.DISPLAY.BLOCK,
+          },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: DRAWER_WIDTH,
+            width: UI_CONSTANTS.DRAWER_WIDTH,
           },
         }}
         open

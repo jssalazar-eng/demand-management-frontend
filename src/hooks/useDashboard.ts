@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { DashboardData, DashboardService } from "../services/DashboardService";
+import { DashboardService } from "../services/DashboardService";
+import { DashboardData } from "../types/demand";
 
 export const useDashboard = (recentCount: number = 5) => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
